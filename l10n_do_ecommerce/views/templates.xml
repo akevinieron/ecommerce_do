@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="rnc_assets_frontend" inherit_id="website.assets_frontend">
+        <xpath expr="script[last()]" position="after">
+            <script type="text/javascript" src="/l10n_do_ecommerce/static/src/js/website_rnc_autocomplete.js"></script>
+        </xpath>
+    </template>
+
+    <template id="tax_type" inherit_id="website_sale.address_b2b">
+        <xpath expr="//form[hasclass('checkout_autoformat')]//t[@t-if][2]" position="replace"/>
+        
+        <xpath expr="//form[hasclass('checkout_autoformat')]//div[hasclass('form-row')]/div" position="before">
+            <t t-if="mode == ('new', 'billing') or mode == ('edit', 'billing')">
+                <div t-attf-class="form-group #{error.get('vat') and 'o_has_error' or ''} col-lg-6 div_vat">
+                    <label class="col-form-label font-weight-normal label-optional" for="vat">RNC / TAX ID </label>
+                    <input type="text" name="vat" t-attf-class="form-control #{error.get('vat') and 'is-invalid' or ''}" t-att-value="'vat' in checkout and checkout['vat']" t-att-readonly="'1' if 'vat' in checkout and checkout['vat'] and not can_edit_vat else None" t-att-title="'Changing VAT number is not allowed once document(s) have been issued for your account. Please contact us directly for this operation.' if 'vat' in checkout and checkout['vat'] and not can_edit_vat else None" />
+                </div>
+                <div class="form-group col-lg-6 div_tax_payer_type">
+                    <label class="col-form-label" for="tax_payer_type">Fiscal Tax Type</label>
+                    <select id="tax_payer_type" name="tax_payer_type" class="form-control" t-att-disabled="'1' if 'vat' in checkout and checkout['vat'] and not can_edit_vat else None">
+                        <t t-foreach="fiscal_types" t-as="ft">
+                            <option t-att-value="ft" t-att-selected="ft == website_sale_order.partner_id.sale_fiscal_type">
+                                <t t-esc="ft_value" />
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <div t-attf-class="form-group #{error.get('company_name') and 'o_has_error' or ''} col-lg-6">
+                    <label class="col-form-label font-weight-normal label-optional" for="company_name">Company Name</label>
+                    <input type="text" name="company_name" t-attf-class="form-control #{error.get('company_name') and 'is-invalid' or ''}" t-att-value="'commercial_company_name' in checkout and checkout['commercial_company_name'] or 'company_name' in checkout and checkout['company_name']" t-att-readonly="'1' if 'vat' in checkout and checkout['vat'] and not can_edit_vat else None" t-att-title="'Changing company name is not allowed once document(s) have been issued for your account. Please contact us directly for this operation.' if 'vat' in checkout and checkout['vat'] and not can_edit_vat else None" />
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="l10n_do_portal_my_details" inherit_id="portal.portal_my_details">
+        <xpath expr="//div[hasclass('o_portal_details')]//div[hasclass('clearfix')][2]" position="before">
+            <div class="form-group col-xl-6">
+                <label class="col-form-label" for="tax_payer_type">Fiscal Tax Type</label>
+                <select name="tax_payer_type" class="form-control" t-att-disabled="disabled if partner.can_edit_vat() else 'false'">
+                    <t t-foreach="fiscal_types" t-as="ft">
+                        <option t-att-value="ft" t-att-selected="ft == partner.sale_fiscal_type">
+                            <t t-esc="ft_value" />
+                        </option>
+                    </t>
+                </select>
+            </div>
+        </xpath>
+    </template>
+</odoo>
